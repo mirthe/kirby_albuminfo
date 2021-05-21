@@ -21,7 +21,6 @@ Kirby::plugin('mirthe/albuminfo', [
                 $apikey = option('lastfm.apiKey');
                 $url = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=$apikey&format=json&artist=$albumartist&album=$albumtitle";
                 $ch = curl_init();
-                curl_setopt($ch, CURLOPT_USERAGENT, 'Test Mirthe.org');
                 curl_setopt($ch, CURLOPT_URL, $url);
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
                 $output = curl_exec($ch);
