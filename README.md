@@ -21,7 +21,7 @@ Placed for example with
 
     (albuminfo: artist: Villagers of Ioannina City title: Age of Aquarius)
 
-![Example of plugin in use](image: /example.png?raw=true)
+<img src="https://github.com/mirthe/kirby_albuminfo/blob/7a8b41631ba7a5eea949a9b5c1ac5923573981ec/example.png" alt="Example of usage">
 
 ## Todo
 
