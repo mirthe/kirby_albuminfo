@@ -28,7 +28,7 @@ Kirby::plugin('mirthe/albuminfo', [
 
                 $albuminfojson = json_decode($output,true);
                 
-                $mijnoutput = '<div class="setlist" style="overflow: auto;">';
+                $mijnoutput = '<div class="well" style="overflow: auto;">';
                 $mijnoutput .= '<img src="'.$albuminfojson['album']['image']['3']['#text'].'" alt="" class="floatleft" style="margin-right: 1rem;">';
                 $mijnoutput .= '<p>'.$albuminfojson['album']['artist']."<br>";
                 $mijnoutput .= '<a href="'.$albuminfojson['album']['url'].'" title="Bekijken op Last.fm">'.$albuminfojson['album']['name']."</a></p>";
