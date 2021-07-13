@@ -38,16 +38,18 @@ Kirby::plugin('mirthe/albuminfo', [
                 //     $mijnoutput .= "<p>".$albuminfojson['album']['wiki']['summary']."</p>";
                 // }
 
-                foreach ($albuminfojson['album']['tracks'] as $tracks) {
-                    if( count($tracks) > 0){
-                        $mijnoutput .= "<ul class=\"songs\">";
-                        for($i = 0; $i < count($tracks); $i++) {
-                            $mijnoutput .= '<li>'. $tracks[$i]['name'] . "</li>";
+                if (array_key_exists('tracks',$albuminfojson['album'])){
+                    foreach ($albuminfojson['album']['tracks'] as $tracks) {
+                        if( count($tracks) > 0){
+                            $mijnoutput .= "<ul class=\"songs\">";
+                            for($i = 0; $i < count($tracks); $i++) {
+                                $mijnoutput .= '<li>'. $tracks[$i]['name'] . "</li>";
+                            }
+                            $mijnoutput .= "</ul>";
                         }
-                        $mijnoutput .= "</ul>";
-                    }
-                    else {
-                        $mijnoutput .= "<p><em>De tracklist is niet bekend bij de Last.fm API.</em></p>";
+                        else {
+                            $mijnoutput .= "<p><em>De tracklist is niet bekend bij de Last.fm API.</em></p>";
+                        }
                     }
                 }
 
