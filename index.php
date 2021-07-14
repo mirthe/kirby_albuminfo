@@ -30,6 +30,7 @@ Kirby::plugin('mirthe/albuminfo', [
                 
                 $mijnoutput = '<div class="well" style="overflow: auto;">';
                 $mijnoutput .= '<img src="'.$albuminfojson['album']['image']['3']['#text'].'" alt="" class="floatleft" style="margin-right: 1rem;">';
+                $mijnoutput .= '<a href="https://open.spotify.com/search/'.$albuminfojson['album']['artist'].' '.$albuminfojson['album']['name'].'" class="floatright" title="Beluisten op Spotify">Spotify</a>';
                 $mijnoutput .= '<p>'.$albuminfojson['album']['artist']."<br>";
                 $mijnoutput .= '<a href="'.$albuminfojson['album']['url'].'" title="Bekijken op Last.fm">'.$albuminfojson['album']['name']."</a></p>";
 
