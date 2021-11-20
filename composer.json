@@ -1,0 +1,14 @@
+{
+    "name": "mirthe/albuminfo",
+    "description": "Shows album info from the Last.fm API based on artist and album title",
+    "homepage": "https://github.com/mirthe/kirby_albuminfo",
+    "keywords": ["kirby-plugin", "last.fm", "music", "album"],
+    "type": "kirby-plugin",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mirthe Valentijn",
+            "email": "me@Mirthe.org"
+        }
+    ]
+}
