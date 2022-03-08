@@ -27,10 +27,12 @@ Kirby::plugin('mirthe/albuminfo', [
                 curl_close ($ch);
 
                 $albuminfojson = json_decode($output,true);
+                // print_r($albuminfojson); exit();
                 
-                $mijnoutput = '<div class="well" style="overflow: auto;">';
-                $mijnoutput .= '<img src="'.$albuminfojson['album']['image']['3']['#text'].'" alt="" class="floatleft" style="margin-right: 1rem;">';
-                $mijnoutput .= '<a href="https://open.spotify.com/search/'.$albuminfojson['album']['artist'].' '.$albuminfojson['album']['name'].'" class="floatright" title="Beluisten op Spotify">Spotify</a>';
+                $mijnoutput = '<div class="well">';
+                $mijnoutput .= '<div class="well-img"><img src="'.$albuminfojson['album']['image']['3']['#text'].'" alt=""></div>';
+                $mijnoutput .= '<div class="well-body">';
+                // $mijnoutput .= '<a href="https://open.spotify.com/search/'.$albuminfojson['album']['artist'].' '.$albuminfojson['album']['name'].'" class="floatright" title="Beluisten op Spotify">Spotify</a>';
                 $mijnoutput .= '<p>'.$albuminfojson['album']['artist']."<br>";
                 $mijnoutput .= '<a href="'.$albuminfojson['album']['url'].'" title="Bekijken op Last.fm">'.$albuminfojson['album']['name']."</a></p>";
 
@@ -54,7 +56,15 @@ Kirby::plugin('mirthe/albuminfo', [
                     }
                 }
 
-                $mijnoutput .= '</div>';
+                $i = 0;
+                $mijnoutput .= "<ul class=\"genres\">";
+                foreach ($albuminfojson['album']['tags']['tag'] as $genre) {
+                    $mijnoutput .= '<li>'. $genre['name'] . "</li>";
+                    if (++$i == 5) break;
+                }
+                $mijnoutput .= "</ul>";
+
+                $mijnoutput .= '</div></div>';
                
                 return $mijnoutput;
                 }
