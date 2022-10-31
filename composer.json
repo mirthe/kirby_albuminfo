@@ -1,5 +1,6 @@
 {
     "name": "mirthe/albuminfo",
+    "version": "1.0",
     "description": "Shows album info from the Last.fm API based on artist and album title",
     "homepage": "https://github.com/mirthe/kirby_albuminfo",
     "keywords": ["kirby-plugin", "last.fm", "music", "album"],
