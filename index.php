@@ -29,41 +29,48 @@ Kirby::plugin('mirthe/albuminfo', [
                 $albuminfojson = json_decode($output,true);
                 // print_r($albuminfojson); exit();
                 
-                $mijnoutput = '<div class="well">';
-                $mijnoutput .= '<div class="well-img"><img src="'.$albuminfojson['album']['image']['3']['#text'].'" alt=""></div>';
-                $mijnoutput .= '<div class="well-body">';
-                // $mijnoutput .= '<a href="https://open.spotify.com/search/'.$albuminfojson['album']['artist'].' '.$albuminfojson['album']['name'].'" class="floatright" title="Beluisten op Spotify">Spotify</a>';
-                $mijnoutput .= '<p>'.$albuminfojson['album']['artist']."<br>";
-                $mijnoutput .= '<a href="'.$albuminfojson['album']['url'].'" title="Bekijken op Last.fm">'.$albuminfojson['album']['name']."</a></p>";
+                if( !isset( $albuminfojson['album'] ) ){
+                        $mijnoutput = '<div class="well">';
+                        $mijnoutput .= '<div class="well-body">Album niet gevonden';
+                } else {
 
-                // TODO use collapse
-                // if( isset( $albuminfojson['album']['wiki'] ) ){
-                //     $mijnoutput .= "<p>".$albuminfojson['album']['wiki']['summary']."</p>";
-                // }
+                    $mijnoutput = '<div class="well">';
+                    $mijnoutput .= '<div class="well-img"><img src="'.$albuminfojson['album']['image']['3']['#text'].'" alt=""></div>';
+                    $mijnoutput .= '<div class="well-body">';
+                    // $mijnoutput .= '<a href="https://open.spotify.com/search/'.$albuminfojson['album']['artist'].' '.$albuminfojson['album']['name'].'" class="floatright" title="Beluisten op Spotify">Spotify</a>';
+                    $mijnoutput .= '<p>'.$albuminfojson['album']['artist']."<br>";
+                    $mijnoutput .= '<a href="'.$albuminfojson['album']['url'].'" title="Bekijken op Last.fm">'.$albuminfojson['album']['name']."</a></p>";
 
-                if (array_key_exists('tracks',$albuminfojson['album'])){
-                    foreach ($albuminfojson['album']['tracks'] as $tracks) {
-                        if( count($tracks) > 0){
-                            $mijnoutput .= "<ul class=\"songs\">";
-                            for($i = 0; $i < count($tracks); $i++) {
-                                $mijnoutput .= '<li>'. $tracks[$i]['name'] . "</li>";
+                    if (array_key_exists('tracks',$albuminfojson['album'])){
+                        foreach ($albuminfojson['album']['tracks'] as $tracks) {
+                            if( count($tracks) > 0){
+                                $mijnoutput .= "<ul class=\"songs\">";
+                                for($i = 0; $i < count($tracks); $i++) {
+                                    $mijnoutput .= '<li>'. $tracks[$i]['name'] . "</li>";
+                                }
+                                $mijnoutput .= "</ul>";
                             }
-                            $mijnoutput .= "</ul>";
-                        }
-                        else {
-                            $mijnoutput .= "<p><em>De tracklist is niet bekend bij de Last.fm API.</em></p>";
+                            else {
+                                $mijnoutput .= "<p><em>De tracklist is niet bekend bij de Last.fm API.</em></p>";
+                            }
                         }
                     }
-                }
 
-                $i = 0;
-                $mijnoutput .= "<ul class=\"genres\">";
-                foreach ($albuminfojson['album']['tags']['tag'] as $genre) {
-                    $mijnoutput .= '<li>'. $genre['name'] . "</li>";
-                    if (++$i == 5) break;
+                    if (array_key_exists('tags',$albuminfojson['album'])
+                     && is_array($albuminfojson['album']['tags']) ){
+                        $i = 0;
+                        $mijnoutput .= "<ul class=\"genres\">";
+                        foreach ($albuminfojson['album']['tags']['tag'] as $genre) {
+                            if (is_array($genre)) {
+                                $mijnoutput .= '<li>'. $genre['name'] . "</li>";
+                            }
+                            if (++$i == 5) break;
+                        }
+                        $mijnoutput .= "</ul>";
+                    }
+                
                 }
-                $mijnoutput .= "</ul>";
-
+                
                 $mijnoutput .= '</div></div>';
                
                 return $mijnoutput;
