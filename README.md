@@ -15,17 +15,6 @@ Add the following to your config:
 
     'lastfm.apiKey' => 'XX'
 
-## Caching
-
-In site/config/config.php, configure the cache
-
-    <?php
-    return [
-        'mirthe.albuminfo.cache' => [
-            'type' => 'file',
-        ],
-    ];
-
 ## Example 
 
 Placed for example with 

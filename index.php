@@ -1,9 +1,4 @@
-<?php 
-
-// TODO opschonen en aanbieden?
-// https://getkirby.com/docs/guide/plugins/best-practices
-
-Kirby::plugin('mirthe/albuminfo', [
+<?php Kirby::plugin('mirthe/albuminfo', [
     'options' => [
         'cache' => true
     ],
@@ -14,85 +9,103 @@ Kirby::plugin('mirthe/albuminfo', [
                 'title'
             ],
             'html' => function($tag) {
-                
                 $albumartist = strtolower(urlencode($tag->artist));
                 $albumtitle = strtolower(urlencode($tag->title));
 
                 $cache = kirby()->cache('mirthe.albuminfo');
                 $cacheKey = 'lastfm-' . $albumartist . '-' . $albumtitle;
-
-                // Try from cache
                 $albuminfojson = $cache->get($cacheKey);
 
                 if ($albuminfojson === null) {
-                    // Not in cache, fetch from API
-                    $albumartist = urlencode($tag->artist);
-                    $albumtitle = urlencode($tag->title);
                     $apikey = option('lastfm.apiKey');
-                    $url = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=$apikey&format=json&artist=$albumartist&album=$albumtitle";
+                    $url = "https://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=$apikey&format=json&artist=".urlencode($tag->artist)."&album=".urlencode($tag->title);
 
-                    $ch = curl_init();
-                    curl_setopt($ch, CURLOPT_URL, $url);
-                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                    curl_setopt($ch, CURLOPT_USERAGENT, kirby()->site()->title());
+                    $ch = curl_init($url);
+                    curl_setopt_array($ch, [
+                        CURLOPT_RETURNTRANSFER => 1,
+                        CURLOPT_USERAGENT      => kirby()->site()->title(),
+                        CURLOPT_FAILONERROR    => true,
+                    ]);
                     $output = curl_exec($ch);
                     curl_close($ch);
 
                     $albuminfojson = json_decode($output, true);
 
-                    // Store in cache for 7 days (604800 seconds)
-                    $cache->set($cacheKey, $albuminfojson, 604800);
+                    if (is_array($albuminfojson) && isset($albuminfojson['album'])) {
+                        $cache->set($cacheKey, $albuminfojson, 604800);
+                    }
                 }
 
-                // print_r($albuminfojson); exit();
-                
-                if( !isset( $albuminfojson['album'] ) ){
-                        $mijnoutput = '<div class="well">';
-                        $mijnoutput .= '<div class="well-body">Album niet gevonden';
+                if (!is_array($albuminfojson) || empty($albuminfojson['album']) || !is_array($albuminfojson['album'])) {
+                    return '<div class="well"><div class="well-body">Album niet gevonden</div></div>';
+                }
+
+                $album = $albuminfojson['album'];
+                $image = '';
+                if (!empty($album['image']) && is_array($album['image'])) {
+                    foreach ($album['image'] as $imageItem) {
+                        if (!empty($imageItem['#text'])) {
+                            $image = $imageItem['#text'];
+                        }
+                    }
+                }
+
+                $mijnoutput = '<div class="well">';
+                if ($image !== '') {
+                    $mijnoutput .= '<div class="well-img"><img src="'.htmlspecialchars($image, ENT_QUOTES).'" alt="'.htmlspecialchars($album['name'] ?? '', ENT_QUOTES).'" /></div>';
+                }
+
+                $mijnoutput .= '<div class="well-body">';
+                $mijnoutput .= '<p>'.htmlspecialchars($album['artist'] ?? '', ENT_QUOTES)."<br>";
+                $mijnoutput .= '<a href="'.htmlspecialchars($album['url'] ?? '#', ENT_QUOTES).'" title="Bekijken op Last.fm">'.htmlspecialchars($album['name'] ?? '', ENT_QUOTES)."</a></p>";
+
+                $tracks = [];
+                if (!empty($album['tracks']['track'])) {
+                    $tracks = $album['tracks']['track'];
+                    if (isset($tracks['name'])) {
+                        $tracks = [$tracks];
+                    }
+                }
+
+                if (is_array($tracks) && count($tracks) > 0) {
+                    $mijnoutput .= "<ul class=\"songs\">";
+                    foreach ($tracks as $track) {
+                        if (!empty($track['name'])) {
+                            $mijnoutput .= '<li>'.htmlspecialchars($track['name'], ENT_QUOTES)."</li>";
+                        }
+                    }
+                    $mijnoutput .= "</ul>";
                 } else {
-
-                    $mijnoutput = '<div class="well">';
-                    $mijnoutput .= '<div class="well-img"><img src="'.$albuminfojson['album']['image']['3']['#text'].'" alt=""></div>';
-                    $mijnoutput .= '<div class="well-body">';
-                    // $mijnoutput .= '<a href="https://open.spotify.com/search/'.$albuminfojson['album']['artist'].' '.$albuminfojson['album']['name'].'" class="floatright" title="Beluisten op Spotify">Spotify</a>';
-                    $mijnoutput .= '<p>'.$albuminfojson['album']['artist']."<br>";
-                    $mijnoutput .= '<a href="'.$albuminfojson['album']['url'].'" title="Bekijken op Last.fm">'.$albuminfojson['album']['name']."</a></p>";
-
-                    if (array_key_exists('tracks',$albuminfojson['album'])){
-                        foreach ($albuminfojson['album']['tracks'] as $tracks) {
-                            if( count($tracks) > 0){
-                                $mijnoutput .= "<ul class=\"songs\">";
-                                for($i = 0; $i < count($tracks); $i++) {
-                                    $mijnoutput .= '<li>'. $tracks[$i]['name'] . "</li>";
-                                }
-                                $mijnoutput .= "</ul>";
-                            }
-                            else {
-                                $mijnoutput .= "<p><em>De tracklist is niet bekend bij de Last.fm API.</em></p>";
-                            }
-                        }
-                    }
-
-                    if (array_key_exists('tags',$albuminfojson['album'])
-                     && is_array($albuminfojson['album']['tags']) ){
-                        $i = 0;
-                        $mijnoutput .= "<ul class=\"genres\">";
-                        foreach ($albuminfojson['album']['tags']['tag'] as $genre) {
-                            if (is_array($genre)) {
-                                $mijnoutput .= '<li>'. $genre['name'] . "</li>";
-                            }
-                            if (++$i == 5) break;
-                        }
-                        $mijnoutput .= "</ul>";
-                    }
-                
+                    $mijnoutput .= "<p><em>De tracklist is niet bekend bij de Last.fm API.</em></p>";
                 }
-                
+
+                $tags = [];
+                if (!empty($album['tags']['tag'])) {
+                    $tags = $album['tags']['tag'];
+                    if (isset($tags['name'])) {
+                        $tags = [$tags];
+                    }
+                }
+
+                if (is_array($tags) && count($tags) > 0) {
+                    $mijnoutput .= "<ul class=\"genres\">";
+                    $i = 0;
+                    foreach ($tags as $genre) {
+                        if (!empty($genre['name'])) {
+                            $mijnoutput .= '<li>'.htmlspecialchars($genre['name'], ENT_QUOTES)."</li>";
+                            if (++$i === 5) {
+                                break;
+                            }
+                        }
+                    }
+                    $mijnoutput .= "</ul>";
+                }
+
                 $mijnoutput .= '</div></div>';
-               
                 return $mijnoutput;
-                }
-            ]
+            }
         ]
-    ]);
+    ]
+]);
+
 ?>
