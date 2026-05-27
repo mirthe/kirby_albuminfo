@@ -15,19 +15,35 @@ Kirby::plugin('mirthe/albuminfo', [
             ],
             'html' => function($tag) {
                 
-                $albumartist = urlencode($tag->artist);
-                $albumtitle = urlencode($tag->title);
+                $albumartist = strtolower(urlencode($tag->artist));
+                $albumtitle = strtolower(urlencode($tag->title));
 
-                $apikey = option('lastfm.apiKey');
-                $url = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=$apikey&format=json&artist=$albumartist&album=$albumtitle";
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, $url);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                curl_setopt($ch, CURLOPT_USERAGENT, kirby()->site()->title());
-                $output = curl_exec($ch);
-                curl_close ($ch);
+                $cache = kirby()->cache('mirthe.albuminfo');
+                $cacheKey = 'lastfm-' . $albumartist . '-' . $albumtitle;
 
-                $albuminfojson = json_decode($output,true);
+                // Try from cache
+                $albuminfojson = $cache->get($cacheKey);
+
+                if ($albuminfojson === null) {
+                    // Not in cache, fetch from API
+                    $albumartist = urlencode($tag->artist);
+                    $albumtitle = urlencode($tag->title);
+                    $apikey = option('lastfm.apiKey');
+                    $url = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=$apikey&format=json&artist=$albumartist&album=$albumtitle";
+
+                    $ch = curl_init();
+                    curl_setopt($ch, CURLOPT_URL, $url);
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                    curl_setopt($ch, CURLOPT_USERAGENT, kirby()->site()->title());
+                    $output = curl_exec($ch);
+                    curl_close($ch);
+
+                    $albuminfojson = json_decode($output, true);
+
+                    // Store in cache for 7 days (604800 seconds)
+                    $cache->set($cacheKey, $albuminfojson, 604800);
+                }
+
                 // print_r($albuminfojson); exit();
                 
                 if( !isset( $albuminfojson['album'] ) ){
