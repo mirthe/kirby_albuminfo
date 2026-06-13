@@ -2,6 +2,18 @@
     'options' => [
         'cache' => true
     ],
+    'translations' => [
+        'nl' => [
+            'mirthe.albuminfo.not-found' => 'Album niet gevonden',
+            'mirthe.albuminfo.view-on-lastfm' => 'Bekijken op Last.fm',
+            'mirthe.albuminfo.tracklist-unknown' => 'De tracklist is niet bekend bij de Last.fm API.'
+        ],
+        'en' => [
+            'mirthe.albuminfo.not-found' => 'Album not found',
+            'mirthe.albuminfo.view-on-lastfm' => 'View on Last.fm',
+            'mirthe.albuminfo.tracklist-unknown' => 'The tracklist is not known by the Last.fm API.'
+        ]
+    ],
     'tags' => [
         'albuminfo' => [
             'attr' =>[
@@ -37,7 +49,7 @@
                 }
 
                 if (!is_array($albuminfojson) || empty($albuminfojson['album']) || !is_array($albuminfojson['album'])) {
-                    return '<div class="well"><div class="well-body">Album niet gevonden</div></div>';
+                    return '<div class="well"><div class="well-body">'.t('mirthe.albuminfo.not-found').'</div></div>';
                 }
 
                 $album = $albuminfojson['album'];
@@ -52,12 +64,16 @@
 
                 $mijnoutput = '<div class="well">';
                 if ($image !== '') {
-                    $mijnoutput .= '<div class="well-img"><img src="'.htmlspecialchars($image, ENT_QUOTES).'" alt="'.htmlspecialchars($album['name'] ?? '', ENT_QUOTES).'" /></div>';
+                    $mijnoutput .= '<div class="well-img"><a href="'.htmlspecialchars($album['url'] ?? '#', ENT_QUOTES).'" 
+                        title="'.t('mirthe.albuminfo.view-on-lastfm').'"><img 
+                        src="'.htmlspecialchars($image, ENT_QUOTES).'" 
+                        alt="'.htmlspecialchars($album['name'] ?? '', ENT_QUOTES).'" /></a></div>';
                 }
 
                 $mijnoutput .= '<div class="well-body">';
                 $mijnoutput .= '<p>'.htmlspecialchars($album['artist'] ?? '', ENT_QUOTES)."<br>";
-                $mijnoutput .= '<a href="'.htmlspecialchars($album['url'] ?? '#', ENT_QUOTES).'" title="Bekijken op Last.fm">'.htmlspecialchars($album['name'] ?? '', ENT_QUOTES)."</a></p>";
+                $mijnoutput .= '<a href="'.htmlspecialchars($album['url'] ?? '#', ENT_QUOTES).'" 
+                    title="'.t('mirthe.albuminfo.view-on-lastfm').'">'.htmlspecialchars($album['name'] ?? '', ENT_QUOTES)."</a></p>";
 
                 $tracks = [];
                 if (!empty($album['tracks']['track'])) {
@@ -76,7 +92,7 @@
                     }
                     $mijnoutput .= "</ul>";
                 } else {
-                    $mijnoutput .= "<p><em>De tracklist is niet bekend bij de Last.fm API.</em></p>";
+                    $mijnoutput .= "<p><em>" . t('mirthe.albuminfo.tracklist-unknown') . "</em></p>";
                 }
 
                 $tags = [];
